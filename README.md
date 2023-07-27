@@ -12,6 +12,7 @@ What if, instead, access and deletion were `O(log(d))` where `d` is the number o
 
 ### Upon deleting an element at index X, insert a pair of `<x, 1>` into the offset vector (resizing said vector if necessary by the standard doubling of size).
 > If there exists a pair of `<x - 1, k>`, alter that pair to be `<x - 1, k + 1>`
+
 This implicitly deletes an index without any operations by marking it to be skipped.
 
 ### Upon accessing the vector at index `i`, begin your offset (`o`) at 0.
