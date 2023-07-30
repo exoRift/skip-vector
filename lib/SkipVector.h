@@ -74,19 +74,17 @@ class SkipVector {
 };
 
 /**
- * Implementation: https://stackoverflow.com/a/466278/10438436
+ * Implementation: https://stackoverflow.com/a/24844826/10438436
  */
 template <typename T>
 size_t SkipVector<T>::_upper_power_of_two (size_t num) const {
-  --num;
-  num |= num >> 1;
-  num |= num >> 2;
-  num |= num >> 4;
-  num |= num >> 8;
-  num |= num >> 16;
-  ++num;
+  if (num <= 1) return 1;
 
-  return num;
+  size_t power = 2;
+  --num;
+  while (num >>= 1) power <<= 1;
+
+  return power;
 }
 
 template <typename T>
