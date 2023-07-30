@@ -6,13 +6,14 @@ Currently, stdlib vectors are `O(1)` access and `O(n)` deletion.
 What if, instead, access and deletion were `O(log(d))` where `d` is the number of deletions, amortized to `O(1)` on account of vector resizing?
 
 ## Specifications
-### Store 2 dynamically resizable vectors.
+### Store 2 dynamically resizable arrays
 - One containing the actual data (which we will call the data vector)
 - One containing pairs where the key is an index in the data vector and the value is a right shift offset, ordered by key (which we will call the offset vector)
+> These arrays will be resized like vectors, doubled every capacity reach.
 
 ### Upon accessing the vector at index `i`,
 - Begin your offset (`o`) at 0
-- Iterate through the skip vector of `<x, k>` until `x > i`, adding each `k` to `o` along the way.
+- Iterate through the skip vector of `<x, k>` until `x > i + o`, adding each `k` to `o` along the way.
 - Finally, access the element at `i + o`.
 
 ### Upon deleting an element at index `i (+ o)`,

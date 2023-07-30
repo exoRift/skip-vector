@@ -1,5 +1,6 @@
 #include <vector>
 #include <utility>
+#include <stdexcept>
 
 template <typename T>
 class SkipIterator {
@@ -7,35 +8,114 @@ class SkipIterator {
 };
 
 template <typename T>
-class SkipVector {
-  protected:
-    std::vector<T> _data;
-    std::vector<std::pair<size_t, size_t>> _offset;
+class ReverseSkipIterator {
 
+};
+
+template <typename T>
+class SkipVector {
   public:
     typedef SkipIterator<T> iterator;
     typedef SkipIterator<const T> const_iterator;
+    typedef ReverseSkipIterator<T> reverse_iterator;
+    typedef ReverseSkipIterator<const T> const_reverse_iterator;
+    typedef std::pair<size_t, size_t> offset_pair;
 
+  protected:
+    size_t _m_data = 0;
+    size_t _u_data = 0;
+    size_t _m_offset = 0;
+    size_t _u_offset = 0;
+
+    T _data[];
+    offset_pair _offset[];
+
+    size_t _get_offset_value (size_t pos) const;
+    offset* _get_offset_entry (size_t pos);
+
+  public:
     T& at (size_t pos) const;
     T& operator[] (size_t pos) const;
     T& front () const;
     T& back () const;
 
-    /** Get the underlying data vector */
-    std::vector<T>& data () const;
-    /** Get the underlying offset vector */
-    std::vector<std::pair<size_t, size_t>>& offset () const;
+    iterator begin ();
+    const_iterator cbegin () const;
+
+    iterator end ();
+    const_iterator cend () const;
+
+    /** Get the underlying data array */
+    T* data () const;
+    /** Get the underlying offset array */
+    offset_pair* offset () const;
 
     bool empty () const;
     size_t size () const;
     void reserve ();
-    size_t capacity ();
+    size_t capacity () const;
+    size_t offset_capacity () const;
 
     void clear ();
-    iterator insert (const_iterator pos, const T& value);
     iterator erase (const_iterator pos);
     iterator erase (const_iterator first, const_iterator last);
-    void push_back (const T& value);
     void pop_back ();
+
+    iterator insert (const_iterator pos, const T& value);
+    void push_back (const T& value);
     void resize (size_t count);
 };
+
+template <typename T>
+size_t SkipVector<T>::_get_offset_value (size_t pos) const {
+  size_t offset = 0;
+
+  for (size_t index = 0; index < _u_offset; ++index) {
+    entry = _offset[index];
+
+    offset += entry.second;
+
+    if (entry.first > pos + offset) break;
+  }
+
+  return offset;
+}
+
+template <typename T>
+T& SkipVector<T>::operator[] (size_t pos) const {
+  size_t offset = _get_offset_value(pos);
+
+  return _data[pos + offset];
+}
+
+template <typename T>
+T& SkipVector<T>::at (size_t pos) const {
+  if (pos <= _u_data) throw std::out_of_range("Out of range"); // TODO: More conventional error
+
+  return operator[](pos);
+}
+
+template <typename T>
+T* SkipVector<T>::data () const {
+  return _data;
+}
+
+template <typename T>
+SkipVector<T>::offset_pair* SkipVector<T>::offset () const {
+  return _offset;
+}
+
+template <typename T>
+size_t SkipVector<T>::size () const {
+  return _u_data;
+}
+
+template <typename T>
+size_t SkipVector<T>::capacity () const {
+  return _m_data;
+}
+
+template <typename T>
+size_t SkipVector<T>::offset_capacity () const {
+  return _m_offset;
+}
