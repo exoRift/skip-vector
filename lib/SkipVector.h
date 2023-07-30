@@ -22,6 +22,8 @@ class SkipVector {
     typedef std::pair<size_t, size_t> offset_pair;
 
   protected:
+    typedef std::pair<offset_pair*, size_t> _calculated_offset;
+
     size_t _m_data = 0;
     size_t _u_data = 0;
     size_t _m_offset = 0;
@@ -30,8 +32,7 @@ class SkipVector {
     T _data[];
     offset_pair _offset[];
 
-    size_t _get_offset_value (size_t pos) const;
-    offset* _get_offset_entry (size_t pos);
+    _calculated_offset _get_offset (size_t pos) const;
 
   public:
     T& at (size_t pos) const;
@@ -67,25 +68,28 @@ class SkipVector {
 };
 
 template <typename T>
-size_t SkipVector<T>::_get_offset_value (size_t pos) const {
+SkipVector<T>::_calculated_offset SkipVector<T>::_get_offset (size_t pos) const {
   size_t offset = 0;
 
-  for (size_t index = 0; index < _u_offset; ++index) {
-    entry = _offset[index];
+  offset_pair* entry = _offset;
+  for (size_t index = 0; index < _u_offset; ++index, ++entry) {
+    if (entry->first > pos + offset) break;
 
-    offset += entry.second;
-
-    if (entry.first > pos + offset) break;
+    offset += entry->second;
   }
 
-  return offset;
+  // NOTE: At this point, the entry is one forward from the for loop
+  if (entry == _offset) entry = NULL;
+  else --entry;
+
+  return std::make_pair(entry, offset);
 }
 
 template <typename T>
 T& SkipVector<T>::operator[] (size_t pos) const {
-  size_t offset = _get_offset_value(pos);
+  _calculated_offset offset = _get_offset(pos);
 
-  return _data[pos + offset];
+  return _data[pos + offset.second];
 }
 
 template <typename T>

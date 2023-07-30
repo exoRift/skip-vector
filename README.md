@@ -19,7 +19,7 @@ What if, instead, access and deletion were `O(log(d))` where `d` is the number o
 ### Upon deleting an element at index `i (+ o)`,
 - Insert a pair of `<i + o, 1>` into the offset vector (resizing said vector if necessary by the standard doubling of size).
 > - If there exists a pair of `<i + o - k, k>`, alter that pair to be `<i + o - k, k + 1>`
-> - If there exists a pair of `<i + o - n, 0>` and there is no other pair with an index between `i + o` and `i + o - n`, alter that pair to be `<i + o, 1>` instead
+> - If there exists a pair of `<i + o + n, 0>`, where `n` is positive or negative, and there is no other pair with an index between `i + o` and `i + o + n`, alter that pair to be `<i + o, 1>` instead
 - *Upon resizing the offset vector, prune out any pairs with a `k` of `0`*
 
 This implicitly deletes an index without any operations by marking it to be skipped.
