@@ -12,9 +12,15 @@ class SkipIterator {
 
   private:
     SkipVector<T>& _skip_vector;
-    T* _cur_pos;
+    T* _cur_elem;
+    size_t _cur_pos;
 
-    SkipIterator (SkipVector<T>& vec, T* pos): _cur_pos(pos), _skip_vector(vec) {};
+    SkipIterator (SkipVector<T>& vec, T* elem, size_t pos): _skip_vector(vec), _cur_elem(elem), _cur_pos(pos) {};
+
+  public:
+    T& operator* () {
+      if (_cur_pos == _skip_vector.size()) return NULL;
+    }
 };
 
 template <typename T>

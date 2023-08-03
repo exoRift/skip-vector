@@ -166,12 +166,12 @@ typename SkipVector<T>::const_iterator SkipVector<T>::cbegin () const {
 
 template <typename T>
 typename SkipVector<T>::iterator SkipVector<T>::end () {
-  return iterator(*this, &back());
+  return iterator(*this, _data + _u_data);
 }
 
 template <typename T>
 typename SkipVector<T>::const_iterator SkipVector<T>::cend () const {
-  return const_iterator(*this, &back());
+  return const_iterator(*this, _data + _u_data);
 }
 
 // template <typename T>
