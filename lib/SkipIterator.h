@@ -12,16 +12,21 @@ class SkipIterator {
 
   private:
     SkipVector<T>& _skip_vector;
-    T* _cur_elem;
-    size_t _cur_pos;
+    T* _cur_elem; // ptr
+    size_t _cur_pos; // actual pos
+    size_t _cur_p_pos; // pseudopos
+    typename SkipVector<T>::_offset_pair* _cur_offset; // ptr
 
     SkipIterator (SkipVector<T>& vec, T* elem, size_t pos): _skip_vector(vec), _cur_elem(elem), _cur_pos(pos) {};
 
   public:
-    T& operator* () {
-      if (_cur_pos == _skip_vector.size()) return NULL;
-    }
+    T& operator* ();
 };
+
+template <typename T>
+T& SkipIterator<T>::operator* () {
+  if (_cur_pos == _skip_vector.size()) return NULL;
+}
 
 template <typename T>
 class ReverseSkipIterator {
