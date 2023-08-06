@@ -72,6 +72,7 @@ class SkipVector {
     void pop_back ();
 
     iterator insert (const_iterator pos, const T& value);
+    iterator insert (const_iterator pos, T&& value);
     void push_back (const T& value);
     void resize (size_t count);
 };
@@ -232,6 +233,11 @@ size_t SkipVector<T>::offset_capacity () const {
 
 template <typename T>
 typename SkipVector<T>::iterator SkipVector<T>::insert (const_iterator pos, const T& value) {
+  insert(T(value)); // convert to r-value by copying
+}
+
+template <typename T>
+typename SkipVector<T>::iterator SkipVector<T>::insert (const_iterator pos, T&& value) {
   // NOTE: Iterator contains data pointer, offset pointer, pos, and pseudopos
   if (_u_data >= _m_data) { // need to resize
     _m_data *= 2;
@@ -243,7 +249,7 @@ typename SkipVector<T>::iterator SkipVector<T>::insert (const_iterator pos, cons
 
     while (ptr - _data < _u_data) { // ptr is within used bounds
       if (ptr == pos._cur_elem) { // upon finding the location to insert, do so
-        *new_ptr = T(value); // copy the value
+        *new_ptr = value;
 
         ++new_ptr;
       }
@@ -271,7 +277,7 @@ typename SkipVector<T>::iterator SkipVector<T>::insert (const_iterator pos, cons
     offset_pair* offset_entry = pos._cur_offset;
 
     T& prior_value = *ptr;
-    *(ptr++) = T(value); // copy the value
+    *(ptr++) = value;
     while (ptr - _data <= _u_data) { // <= to go one above for insert
       if (offset_entry - _offset < _u_offset && ptr - _data == offset_entry->first) { // offset is within bounds and pos matches
         ptr += offset_entry->second;
