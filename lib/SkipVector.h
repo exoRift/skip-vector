@@ -232,22 +232,23 @@ size_t SkipVector<T>::offset_capacity () const {
 
 // todo: return iterator
 template <typename T>
-typename SkipVector<T>::iterator SkipVector<T>::insert (const_iterator pos, T&& value) {
+typename SkipVector<T>::iterator SkipVector<T>::insert (const_iterator pos, T&& value) { // TODO: possibly doing index comparisons for no reason when we can just replace? (make sure using correct lengths as well)
+  const size_t numeric_pos = pos._cur_elem - _data;
   offset_pair* offset_entry = pos._cur_offset;
 
   if (
     offset_entry - _offset < _u_offset && // within offset array bounds
-    pos._cur_pos - offset_entry->first < offset_entry->second // offset range includes pos
+    numeric_pos - offset_entry->first < offset_entry->second // offset range includes pos
   ) { // we can overwrite the value
     *pos._cur_elem = value;
 
     if (offset_entry->second == 1) { // single deletion
       if (offset_entry - _offset >= _u_offset) --_u_offset; // trim out
       else offset_entry->second = 0;
-    } else if (pos._cur_pos == offset_entry->first + offset_entry->second) { // insert at tail end
+    } else if (numeric_pos == offset_entry->first + offset_entry->second) { // insert at tail end
       --offset_entry->second;
     } else { // splice offset
-      const size_t difference = pos._cur_pos - offset_entry->first;
+      const size_t difference = numeric_pos - offset_entry->first;
       const size_t old_offset = offset_entry->second;
 
       offset_entry->second = difference;
@@ -255,13 +256,13 @@ typename SkipVector<T>::iterator SkipVector<T>::insert (const_iterator pos, T&& 
       // insert new offset
       if (_u_offset >= _m_offset) { // need to resize offset array
         _m_offset *= 2;
-        offset_pair* new_offset = new offset_pair[_m_offset];
+        offset_pair* const new_offset = new offset_pair[_m_offset];
 
         offset_pair* offset_ptr = _offset;
         offset_pair* new_offset_ptr = new_offset;
         while (offset_ptr - _offset < _u_offset) {
           if (offset_ptr == offset_entry + 1) {
-            *new_offset_ptr = std::make_pair(pos._cur_pos + 1, old_offset - (pos._cur_pos - offset_entry->first));
+            *new_offset_ptr = std::make_pair(numeric_pos + 1, old_offset - (numeric_pos - offset_entry->first));
 
             ++new_offset_ptr;
           } else {
@@ -292,7 +293,7 @@ typename SkipVector<T>::iterator SkipVector<T>::insert (const_iterator pos, T&& 
     }
   } else if (_u_data >= _m_data) { // need to resize data array
     _m_data *= 2;
-    T* new_data = new T[_m_data];
+    T* const new_data = new T[_m_data];
 
     T* new_ptr = new_data;
     T* ptr = _data;
@@ -350,7 +351,7 @@ template <typename T>
 void SkipVector<T>::push_back (T&& value) {
   if (_u_data >= _m_data) { // need to resize
     _m_data *= 2;
-    T* new_data = new T[_m_data];
+    T* const new_data = new T[_m_data];
 
     T* new_ptr = new_data;
     T* ptr = _data;
@@ -377,9 +378,13 @@ void SkipVector<T>::push_back (T&& value) {
     _data = new_data;
   }
 
-  const offset_pair* last_offset_entry = _offset + _u_offset;
+  offset_pair* const last_offset_entry = _offset + _u_offset;
 
+  if (_u_offset && last_offset_entry->first + last_offset_entry->second >= _u_data) { // there exists some offset and it reaches the end
+    _data[_u_data - 1] = std::move(value);
 
+    --last_offset_entry->second;
+  } else _data[_u_data++] = std::move(value);
 }
 
 #endif
