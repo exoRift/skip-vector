@@ -232,6 +232,71 @@ size_t SkipVector<T>::offset_capacity () const {
 
 // todo: return iterator
 template <typename T>
+typename SkipVector<T>::iterator SkipVector<T>::erase (const_iterator pos) {
+  const size_t numeric_pos = pos._cur_elem - _data;
+  offset_pair* offset_entry = pos._cur_offset;
+  offset_pair* const next_offset_entry = pos._cur_offset + 1;
+
+  if (
+    offset_entry - _offset < _u_offset && // within offset array bounds
+    numeric_pos - (offset_entry->first + offset_entry->second) == 1 // current offset is 1 away
+  ) {
+    ++offset_entry->second; // increase width by 1
+  } else if (
+    next_offset_entry - _offset < _u_offset && // within offset array bounds
+    next_offset_entry->first - numeric_pos == 1
+  ) {
+    --next_offset_entry->first; // move back 1
+  } else if (_u_offset >= _m_offset) { // need to resize offset array
+    _m_offset *= 2;
+    offset_pair* const new_offset = new offset_pair[_m_offset];
+    size_t new_u_offset = _u_offset;
+
+    offset_pair* offset_ptr = _offset;
+    offset_pair* new_offset_ptr = new_offset;
+    while (offset_ptr - _offset < _u_offset) {
+      if (offset_ptr == offset_entry + 1) {
+        *new_offset_ptr = std::make_pair(numeric_pos, 1);
+
+        ++new_offset_ptr;
+      } else {
+        if (offset_ptr->second) { // if nonzero offset, copy over and advance new offset pointer
+          *new_offset_ptr = *offset_ptr;
+          ++new_offset_ptr;
+        } else --new_u_offset;
+
+        ++offset_ptr;
+      }
+    }
+
+    delete[] _offset;
+    _offset = new_offset;
+    _u_offset = new_u_offset + 1; // add one for new entry
+  } else { // insert new entry into offset array
+    bool overwritten = false;
+
+    offset_pair& prior_value = *offset_entry;
+    *(offset_entry++) = std::make_pair(numeric_pos, 1);
+    while (offset_entry - _offset <= _u_offset) { // <= to go one above for insert
+      if (offset_entry->second == 0) { // the next offset is 0 (can be replaced)
+        *offset_entry = prior_value;
+        overwritten = true;
+
+        break;
+      } else {
+        std::swap(*offset_entry, prior_value);
+
+        ++offset_entry;
+      }
+    }
+
+    if (!overwritten) ++ _u_offset;
+    --_p_data;
+  }
+}
+
+// todo: return iterator
+template <typename T>
 typename SkipVector<T>::iterator SkipVector<T>::insert (const_iterator pos, T&& value) { // TODO: possibly doing index comparisons for no reason when we can just replace? (make sure using correct lengths as well)
   const size_t numeric_pos = pos._cur_elem - _data;
   offset_pair* offset_entry = pos._cur_offset;
@@ -257,6 +322,7 @@ typename SkipVector<T>::iterator SkipVector<T>::insert (const_iterator pos, T&& 
       if (_u_offset >= _m_offset) { // need to resize offset array
         _m_offset *= 2;
         offset_pair* const new_offset = new offset_pair[_m_offset];
+        size_t new_u_offset = _u_offset;
 
         offset_pair* offset_ptr = _offset;
         offset_pair* new_offset_ptr = new_offset;
@@ -266,16 +332,18 @@ typename SkipVector<T>::iterator SkipVector<T>::insert (const_iterator pos, T&& 
 
             ++new_offset_ptr;
           } else {
-            *new_offset_ptr = *offset_ptr;
+            if (offset_ptr->second) { // if nonzero offset, copy over and advance new offset pointer
+              *new_offset_ptr = *offset_ptr;
+              ++new_offset_ptr;
+            } else --new_u_offset;
 
             ++offset_ptr;
-            ++new_offset_ptr;
           }
         }
 
         delete[] _offset;
         _offset = new_offset;
-        ++_u_offset;
+        _u_offset = new_u_offset + 1; // add one for new entry
       } else { // default insert into offset array
         offset_pair* offset_ptr = offset_entry;
         offset_pair& prior_value = *offset_ptr;
