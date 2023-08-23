@@ -233,7 +233,7 @@ size_t SkipVector<T>::offset_capacity () const {
 // todo: return iterator
 template <typename T>
 typename SkipVector<T>::iterator SkipVector<T>::erase (const_iterator pos) {
-  const size_t numeric_pos = pos._cur_elem - _data;
+  const size_t numeric_pos = pos._cur_pos;
   offset_pair* offset_entry = pos._cur_offset;
   offset_pair* const next_offset_entry = pos._cur_offset + 1;
 
@@ -298,14 +298,14 @@ typename SkipVector<T>::iterator SkipVector<T>::erase (const_iterator pos) {
 // todo: return iterator
 template <typename T>
 typename SkipVector<T>::iterator SkipVector<T>::insert (const_iterator pos, T&& value) { // TODO: possibly doing index comparisons for no reason when we can just replace? (make sure using correct lengths as well)
-  const size_t numeric_pos = pos._cur_elem - _data;
+  const size_t numeric_pos = pos._cur_pos;
   offset_pair* offset_entry = pos._cur_offset;
 
   if (
     offset_entry - _offset < _u_offset && // within offset array bounds
     numeric_pos - offset_entry->first < offset_entry->second // offset range includes pos
   ) { // we can overwrite the value
-    *pos._cur_elem = value;
+    _data[numeric_pos] = value;
 
     if (offset_entry->second == 1) { // single deletion
       if (offset_entry - _offset >= _u_offset) --_u_offset; // trim out
@@ -368,7 +368,7 @@ typename SkipVector<T>::iterator SkipVector<T>::insert (const_iterator pos, T&& 
     offset_entry = _offset;
 
     while (ptr - _data < _u_data) { // ptr is within used bounds
-      if (ptr == pos._cur_elem) { // upon finding the location to insert, do so
+      if (ptr == _data + numeric_pos) { // upon finding the location to insert, do so
         *new_ptr = std::move(value);
 
         ++new_ptr;
@@ -393,7 +393,7 @@ typename SkipVector<T>::iterator SkipVector<T>::insert (const_iterator pos, T&& 
     delete[] _data;
     _data = new_data;
   } else { // default insert
-    T* ptr = pos._cur_elem;
+    T* ptr = _data + pos._cur_pos;
 
     T& prior_value = *ptr;
     *(ptr++) = std::move(value);
