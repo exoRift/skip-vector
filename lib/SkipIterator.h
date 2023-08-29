@@ -24,13 +24,33 @@ class SkipIterator {
 
     T& operator* ();
 
-    SkipIterator<T> operator+ ();
-    SkipIterator<T> operator- ();
-    SkipIterator<T> operator++ (int);
+    SkipIterator<T> operator+ (size_t inc);
+    SkipIterator<T> operator- (size_t dec);
     SkipIterator<T>& operator++ ();
-    SkipIterator<T> operator-- (int);
+    SkipIterator<T> operator++ (int);
     SkipIterator<T>& operator-- ();
+    SkipIterator<T> operator-- (int);
+
+    bool operator== (SkipIterator<T>& other);
 };
+
+template <typename T>
+SkipIterator<T>::SkipIterator (const SkipIterator<T>& original) {
+  _skip_vector = original._skip_vector;
+  _cur_p_pos = original._cur_p_pos;
+  _cur_pos = original._cur_pos;
+  _cur_offset = original._cur_offset;
+}
+
+template <typename T>
+SkipIterator<T>& SkipIterator<T>::operator= (const SkipIterator<T>& original) {
+  _skip_vector = original._skip_vector;
+  _cur_p_pos = original._cur_p_pos;
+  _cur_pos = original._cur_pos;
+  _cur_offset = original._cur_offset;
+
+  return *this;
+}
 
 template <typename T>
 T& SkipIterator<T>::operator* () {
@@ -56,6 +76,31 @@ SkipIterator<T>& SkipIterator<T>::operator++ () {
 }
 
 template <typename T>
+SkipIterator<T> SkipIterator<T>::operator+ (size_t inc) {
+  SkipIterator<T> incremented(*this);
+  for (size_t i = 0; i < inc; ++i) ++incremented;
+
+  return incremented;
+}
+
+template <typename T>
+SkipIterator<T> SkipIterator<T>::operator- (size_t dec) {
+  SkipIterator<T> decremented(*this);
+  for (size_t i = 0; i < dec; ++i) --decremented;
+
+  return decremented;
+}
+
+template <typename T>
+SkipIterator<T> SkipIterator<T>::operator++ (int) {
+  const SkipIterator<T> prev(*this);
+
+  operator++();
+
+  return prev;
+}
+
+template <typename T>
 SkipIterator<T>& SkipIterator<T>::operator-- () {
   --_cur_p_pos;
 
@@ -69,6 +114,20 @@ SkipIterator<T>& SkipIterator<T>::operator-- () {
   }
 
   return *this;
+}
+
+template <typename T>
+SkipIterator<T> SkipIterator<T>::operator-- (int) {
+  const SkipIterator<T> prev(*this);
+
+  operator--();
+
+  return prev;
+}
+
+template <typename T>
+bool SkipIterator<T>::operator== (SkipIterator<T>& other) {
+  return _cur_pos == other._cur_pos;
 }
 
 template <typename T>
