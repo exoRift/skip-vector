@@ -65,7 +65,7 @@ class SkipVector {
     size_t capacity () const;
     size_t offset_capacity () const;
 
-    void reserve ();
+    void reserve (size_t data_size, size_t offset_size = 0);
     void clear ();
     iterator erase (const_iterator pos);
     iterator erase (const_iterator first, const_iterator last);
@@ -229,6 +229,27 @@ template <typename T>
 size_t SkipVector<T>::offset_capacity () const {
   return _m_offset;
 }
+
+template <typename T>
+void SkipVector<T>::reserve (size_t data_size, size_t offset_size) {
+  size_t rounded_data = _upper_power_of_two(data_size);
+  size_t rounded_offset = _upper_power_of_two(offset_size);
+
+  T* old_data = _data;
+  _data = new T[rounded_data];
+  for (size_t i = 0; i < _m_data; ++i) _data[i] = old_data[i];
+  _m_data = rounded_data;
+
+  offset_pair* old_offset = _offset;
+  _offset = new offset_pair[rounded_offset];
+  for (size_t i = 0; i < _m_offset; ++i) _offset[i] = old_offset[i];
+  _m_offset = rounded_offset;
+};
+
+template <typename T>
+void SkipVector<T>::clear () {
+  
+};
 
 // todo: return iterator
 template <typename T>
