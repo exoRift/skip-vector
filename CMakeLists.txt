@@ -5,7 +5,8 @@ set (CMAKE_CXX_STANDARD 17)
 
 include(CTest)
 enable_testing()
-add_test(test test/test.cpp)
+add_executable(benchmark test/benchmark.cpp)
+add_test(test benchmark 100 100)
 
 add_library(skip-vector INTERFACE lib/SkipVector.h)
 

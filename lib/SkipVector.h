@@ -71,8 +71,8 @@ class SkipVector {
     iterator erase (const_iterator first, const_iterator last);
     void pop_back ();
 
-    iterator insert (const_iterator pos, T&& value);
-    void push_back (T&& value);
+    iterator insert (const_iterator pos, const T& value);
+    void push_back (const T& value);
     void resize (size_t count);
 };
 
@@ -318,7 +318,7 @@ typename SkipVector<T>::iterator SkipVector<T>::erase (const_iterator pos) {
 
 // todo: return iterator
 template <typename T>
-typename SkipVector<T>::iterator SkipVector<T>::insert (const_iterator pos, T&& value) { // TODO: possibly doing index comparisons for no reason when we can just replace? (make sure using correct lengths as well)
+typename SkipVector<T>::iterator SkipVector<T>::insert (const_iterator pos, const T& value) { // TODO: possibly doing index comparisons for no reason when we can just replace? (make sure using correct lengths as well)
   const size_t numeric_pos = pos._cur_pos;
   offset_pair* offset_entry = pos._cur_offset;
 
@@ -437,7 +437,7 @@ typename SkipVector<T>::iterator SkipVector<T>::insert (const_iterator pos, T&& 
 };
 
 template <typename T>
-void SkipVector<T>::push_back (T&& value) {
+void SkipVector<T>::push_back (const T& value) {
   if (_u_data >= _m_data) { // need to resize
     _m_data *= 2;
     T* const new_data = new T[_m_data];
