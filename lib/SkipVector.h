@@ -248,7 +248,9 @@ void SkipVector<T>::reserve (size_t data_size, size_t offset_size) {
 
 template <typename T>
 void SkipVector<T>::clear () {
-  
+  _u_data = 0;
+  _p_data = 0;
+  _u_offset = 0;
 };
 
 // todo: return iterator
