@@ -37,7 +37,7 @@ class SkipVector {
   public:
     SkipVector (size_t count = 1);
     SkipVector (size_t count, const T& value);
-    SkipVector (const SkipVector<T>& original);
+    SkipVector (const SkipVector<T>& original); // TODO: constructor and operator=
     ~SkipVector ();
 
     T& operator[] (size_t pos) const;
@@ -50,10 +50,10 @@ class SkipVector {
     iterator end ();
     const_iterator cend () const;
 
-    reverse_iterator rbegin ();
-    const_reverse_iterator crbegin () const;
-    reverse_iterator rend ();
-    const_reverse_iterator crend () const;
+    reverse_iterator rbegin (); // TODO
+    const_reverse_iterator crbegin () const; // TODO
+    reverse_iterator rend (); // TODO
+    const_reverse_iterator crend () const; // TODO
 
     /** Get the underlying data array */
     T* data () const;
@@ -68,12 +68,12 @@ class SkipVector {
     void reserve (size_t data_size, size_t offset_size = 0);
     void clear ();
     iterator erase (const_iterator pos);
-    iterator erase (const_iterator first, const_iterator last);
-    void pop_back ();
+    iterator erase (const_iterator first, const_iterator last); // TODO
+    void pop_back (); // TODO
 
     iterator insert (const_iterator pos, const T& value);
     void push_back (const T& value);
-    void resize (size_t count);
+    void resize (size_t count); // TODO
 };
 
 template <typename T>
@@ -162,24 +162,25 @@ T& SkipVector<T>::back () const {
 
 template <typename T>
 typename SkipVector<T>::iterator SkipVector<T>::begin () {
-  return iterator(*this, _data, _offset);
+  return iterator(this, 0, 0, _offset);
 }
 
 template <typename T>
 typename SkipVector<T>::const_iterator SkipVector<T>::cbegin () const {
-  return const_iterator(*this, _data, _offset);
+  return const_iterator(this, 0, 0, _offset);
 }
 
 template <typename T>
 typename SkipVector<T>::iterator SkipVector<T>::end () {
-  return iterator(*this, _data + _u_data, _offset);
+  return iterator(this, _u_data, _p_data, _offset + _m_offset);
 }
 
 template <typename T>
 typename SkipVector<T>::const_iterator SkipVector<T>::cend () const {
-  return const_iterator(*this, _data + _u_data, _offset);
+  return const_iterator(this, _u_data, _p_data, _offset + _m_offset);
 }
 
+// TODO
 // template <typename T>
 // typename SkipVector<T>::reverse_iterator SkipVector<T>::rbegin () {
 //   return reverse_iterator(*this, _data);
@@ -316,6 +317,8 @@ typename SkipVector<T>::iterator SkipVector<T>::erase (const_iterator pos) {
     if (!overwritten) ++ _u_offset;
     --_p_data;
   }
+
+  return iterator(this, pos._cur_pos, ) // TODO
 }
 
 // todo: return iterator

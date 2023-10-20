@@ -11,12 +11,12 @@ class SkipIterator {
   template <typename> friend class ReverseSkipIterator;
 
   private:
-    SkipVector<T>& _skip_vector;
+    SkipVector<T>* _skip_vector;
     size_t _cur_pos; // actual pos
     size_t _cur_p_pos; // pseudopos
     typename SkipVector<T>::offset_pair* _cur_offset; // ptr
 
-    SkipIterator (SkipVector<T>& vec, size_t pos, size_t p_pos): _skip_vector(vec), _cur_pos(pos), _cur_p_pos(p_pos) {};
+    SkipIterator (SkipVector<T>* vec, size_t pos, size_t p_pos, typename SkipVector<T>::offset_pair* offset): _skip_vector(vec), _cur_pos(pos), _cur_p_pos(p_pos), _cur_offset(offset) {};
 
   public:
     SkipIterator (const SkipIterator<T>& original);
@@ -24,14 +24,18 @@ class SkipIterator {
 
     T& operator* ();
 
-    SkipIterator<T> operator+ (size_t inc);
-    SkipIterator<T> operator- (size_t dec);
+    SkipIterator<T> operator+ (size_t inc) const;
+    SkipIterator<T> operator- (size_t dec) const;
     SkipIterator<T>& operator++ ();
     SkipIterator<T> operator++ (int);
     SkipIterator<T>& operator-- ();
     SkipIterator<T> operator-- (int);
 
     bool operator== (SkipIterator<T>& other);
+
+    operator SkipIterator<const T>() const {
+      return *this;
+    }
 };
 
 template <typename T>
@@ -54,9 +58,9 @@ SkipIterator<T>& SkipIterator<T>::operator= (const SkipIterator<T>& original) {
 
 template <typename T>
 T& SkipIterator<T>::operator* () {
-  if (_cur_pos == _skip_vector.size()) return NULL;
+  if (_cur_pos == _skip_vector->size()) return NULL;
 
-  return _skip_vector._data[_cur_pos];
+  return _skip_vector->_data[_cur_pos];
 }
 
 template <typename T>
@@ -64,7 +68,7 @@ SkipIterator<T>& SkipIterator<T>::operator++ () {
   ++_cur_p_pos;
 
   if (
-    _cur_offset < _skip_vector.offset + _skip_vector._u_offset && // offset within bounds
+    _cur_offset < _skip_vector->_offset + _skip_vector->_u_offset && // offset within bounds
     _cur_pos == _cur_offset->first // we've reached offset point
   ) {
     _cur_pos += _cur_offset->second;
@@ -76,7 +80,7 @@ SkipIterator<T>& SkipIterator<T>::operator++ () {
 }
 
 template <typename T>
-SkipIterator<T> SkipIterator<T>::operator+ (size_t inc) {
+SkipIterator<T> SkipIterator<T>::operator+ (size_t inc) const {
   SkipIterator<T> incremented(*this);
   for (size_t i = 0; i < inc; ++i) ++incremented;
 
@@ -84,7 +88,7 @@ SkipIterator<T> SkipIterator<T>::operator+ (size_t inc) {
 }
 
 template <typename T>
-SkipIterator<T> SkipIterator<T>::operator- (size_t dec) {
+SkipIterator<T> SkipIterator<T>::operator- (size_t dec) const {
   SkipIterator<T> decremented(*this);
   for (size_t i = 0; i < dec; ++i) --decremented;
 
@@ -105,7 +109,7 @@ SkipIterator<T>& SkipIterator<T>::operator-- () {
   --_cur_p_pos;
 
   if (
-    _cur_offset >= _skip_vector.offset && // offset within bounds
+    _cur_offset >= _skip_vector->_offset && // offset within bounds
     _cur_pos < _cur_offset->first + _cur_offset->second // we're within the offset point boundaries
   ) {
     _cur_pos -= _cur_offset->second;
@@ -131,13 +135,8 @@ bool SkipIterator<T>::operator== (SkipIterator<T>& other) {
 }
 
 template <typename T>
-class ReverseSkipIterator {
-  private:
-    SkipIterator<T> _base;
+class ReverseSkipIterator : public SkipIterator<T> {
 
-    // SkipIterator ();
-
-  
 };
 
 #endif
