@@ -14,7 +14,7 @@ class SkipIterator {
     SkipVector<T>* _skip_vector;
     size_t _cur_pos; // actual pos
     size_t _cur_p_pos; // pseudopos
-    typename SkipVector<T>::offset_pair* _cur_offset; // ptr
+    typename SkipVector<T>::offset_pair* _cur_offset; // ptr to next offset entry
 
     SkipIterator (SkipVector<T>* vec, size_t pos, size_t p_pos, typename SkipVector<T>::offset_pair* offset): _skip_vector(vec), _cur_pos(pos), _cur_p_pos(p_pos), _cur_offset(offset) {};
 

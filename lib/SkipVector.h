@@ -254,7 +254,6 @@ void SkipVector<T>::clear () {
   _u_offset = 0;
 };
 
-// todo: return iterator
 template <typename T>
 typename SkipVector<T>::iterator SkipVector<T>::erase (const_iterator pos) {
   const size_t numeric_pos = pos._cur_pos;
@@ -266,11 +265,15 @@ typename SkipVector<T>::iterator SkipVector<T>::erase (const_iterator pos) {
     numeric_pos - (offset_entry->first + offset_entry->second) == 1 // current offset is 1 away
   ) {
     ++offset_entry->second; // increase width by 1
+
+    return pos + 1;
   } else if (
     next_offset_entry - _offset < _u_offset && // within offset array bounds
     next_offset_entry->first - numeric_pos == 1
   ) {
     --next_offset_entry->first; // move back 1
+
+    return iterator(this, pos._cur_pos + next_offset_entry->second, pos._cur_p_pos, next_offset_entry + 1);
   } else if (_u_offset >= _m_offset) { // need to resize offset array
     _m_offset *= 2;
     offset_pair* const new_offset = new offset_pair[_m_offset];
@@ -296,6 +299,8 @@ typename SkipVector<T>::iterator SkipVector<T>::erase (const_iterator pos) {
     delete[] _offset;
     _offset = new_offset;
     _u_offset = new_u_offset + 1; // add one for new entry
+
+    return iterator(this, pos._cur_pos, pos._cur_p_pos, new_offset_ptr);
   } else { // insert new entry into offset array
     bool overwritten = false;
 
@@ -316,9 +321,9 @@ typename SkipVector<T>::iterator SkipVector<T>::erase (const_iterator pos) {
 
     if (!overwritten) ++ _u_offset;
     --_p_data;
-  }
 
-  return iterator(this, pos._cur_pos, ) // TODO
+    return iterator(this, pos._cur_pos, pos._cur_p_pos, offset_entry);
+  }
 }
 
 // todo: return iterator
