@@ -266,7 +266,7 @@ typename SkipVector<T>::iterator SkipVector<T>::erase (const_iterator pos) {
   ) {
     ++offset_entry->second; // increase width by 1
 
-    return pos + 1;
+    return iterator(this, pos._cur_pos, pos._cur_p_pos, pos._cur_offset) + 1;
   } else if (
     next_offset_entry - _offset < _u_offset && // within offset array bounds
     next_offset_entry->first - numeric_pos == 1
