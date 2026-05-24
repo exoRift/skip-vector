@@ -115,9 +115,7 @@ int main (int argc, char* argv[]) {
     perform_operation(&skip, skipCursor, *operation, *value);
   TIME_POINT execution_skip_end = NOW;
 
-  printf("Executing operations for skip vector took %luns\n", CAST_NS(execution_skip_begin - execution_skip_end).count());
-
-  // Sanity Check
+  printf("Executing operations for skip vector took    %luns\n", CAST_NS(execution_skip_begin - execution_skip_end).count());
 
   // Data Integrity Check
 

@@ -1,3 +1,6 @@
+# Important Note
+After AI-assisted experimentation, this implementation does not surpass the vanilla vector often, even in erase-dominated circumstances. Therefore, as of May 2026, this project is **abandoned**
+
 # skip-vector
 A C++ data structure aimed at increasing the performance of a vector when many deletions are expected
 
